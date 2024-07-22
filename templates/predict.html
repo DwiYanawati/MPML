@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <title>Customer Class Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, pink);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label, input, select {
+            margin: 10px 0;
+        }
+        input[type="submit"] {
+            background-color: palevioletred;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #6a11cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Class Prediction</h1>
+        <form action="/predict" method="post">
+            <label>Age:</label>
+            <input type="text" name="Age">
+            <label>Family Size:</label>
+            <input type="text" name="Family_Size">
+            <label>Gender:</label>
+            <select name="Gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            <label>Monthly Income:</label>
+            <select name="Monthly_Income">
+                <option value="No Income">No Income</option>
+                <option value="Below Rs.10000">Below Rs.10000</option>
+                <option value="10001 to 25000">10001 to 25000</option>
+                <option value="25001 to 50000">25001 to 50000</option>
+                <option value="More than 50000">More than 50000</option>
+            </select>
+            <input type="submit" value="Predict">
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+    <title>Add New Customer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, pink);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label, input {
+            margin: 10px 0;
+        }
+        input[type="submit"] {
+            background-color:  palevioletred;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #6a11cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Customer</h1>
+        <form action="/addrec" method="post">
+            <label>ID:</label>
+            <input type="text" name="id">
+            <label>Age:</label>
+            <input type="text" name="Age">
+            <label>Gender:</label>
+            <input type="text" name="Gender">
+            <label>Monthly Income:</label>
+            <input type="text" name="Monthly_Income">
+            <label>Family Size:</label>
+            <input type="text" name="Family_Size">
+            <input type="submit" value="Add">
+        </form>
+    </div>
+</body>
+</html>
