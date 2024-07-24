@@ -1,23 +1,20 @@
 import streamlit as st
 import requests
 
-st.title('Customer Feedback Prediction App')
+# Input dari pengguna
+family_size = st.number_input("Family Size", min_value=1)
+gender = st.selectbox("Gender", ["Male", "Female"])
+monthly_income = st.selectbox("Monthly Income", ["No Income", "Low", "Medium", "High"])
 
-age = st.number_input('Age', min_value=0)
-family_size = st.number_input('Family Size', min_value=1, max_value=10)
-gender = st.selectbox('Gender', ['Male', 'Female'])
-monthly_income = st.selectbox('Monthly Income', ['No Income', 'Below Rs.10000', '10001 to 25000', '25001 to 50000', 'More than 50000'])
-
-if st.button('Predict'):
-    data = {
-        'Age': age,
-        'Family_Size': family_size,
-        'Gender': gender,
-        'Monthly_Income': monthly_income
-    }
-    try:
-        response = requests.post('http://localhost:5000/predict', json=data)
-        result = response.json().get('prediction', 'Error: No prediction returned')
-        st.write(f'Prediction: {result}')
-    except Exception as e:
-        st.write(f"Error: {str(e)}")
+# Tombol untuk prediksi
+if st.button("Predict"):
+    # Kirim permintaan ke server backend
+    url = "http://localhost:5000/predict"
+    data = {"family_size": family_size, "gender": gender, "monthly_income": monthly_income}
+    response = requests.post(url, json=data)
+    
+    if response.status_code == 200:
+        prediction = response.json().get("prediction")
+        st.write(f"Prediction: {prediction}")
+    else:
+        st.write("Error:", response.status_code)
