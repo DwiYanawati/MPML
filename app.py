@@ -59,9 +59,29 @@ def main():
             if list(data.columns) != expected_features:
                 st.error("Fitur yang diberikan tidak sesuai dengan yang diharapkan oleh model.")
             else:
+                # Preprocessing jika diperlukan (misal: label encoding)
+                data_processed = preprocess_data(data)
+
                 # Predict
-                prediction = model.predict(data)[0]
+                prediction = model.predict(data_processed)[0]
                 st.write(f'Prediction: {prediction}')
+
+def preprocess_data(data):
+    # Misal kita perlu melakukan label encoding untuk fitur kategorikal
+    # Label encoding untuk 'Gender'
+    data['Gender'] = data['Gender'].map({'Male': 0, 'Female': 1})
+
+    # Label encoding untuk 'Marital Status'
+    data['Marital Status'] = data['Marital Status'].map({
+        'Single': 0, 
+        'Married': 1, 
+        'Prefer Not to Say': 2
+    })
+
+    # Lakukan preprocessing lain yang dibutuhkan model
+    # ...
+
+    return data
 
 if __name__ == "__main__":
     main()
