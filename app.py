@@ -89,4 +89,4 @@ if st.button('Predict'):
         result = response.json().get('prediction', 'Error: No prediction returned')
         st.write(f'Prediction: {result}')
     except Exception as e:
-        st.write(f"Error: {str(e)})
+        st.write(f"Error: {str(e)}")
