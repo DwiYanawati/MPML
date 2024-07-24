@@ -1,29 +1,48 @@
 import streamlit as st
-import requests
 import joblib
 import pandas as pd
-
-# Ganti dengan jalur absolut ke file model Anda
 import os
-import joblib
 
-st.title('Customer Feedback Prediction App')
+# Load the model
+model_path = 'best_model.pkl'
+if not os.path.isfile(model_path):
+    raise FileNotFoundError(f"Model file {model_path} does not exist.")
+model = joblib.load(model_path)
 
-age = st.number_input('Age', min_value=0)
-family_size = st.number_input('Family Size', min_value=1, max_value=10)
-gender = st.selectbox('Gender', ['Male', 'Female'])
-monthly_income = st.selectbox('Monthly Income', ['No Income', 'Below Rs.10000', '10001 to 25000', '25001 to 50000', 'More than 50000'])
+# Streamlit application
+def main():
+    st.title('Customer Prediction App')
 
-if st.button('Predict'):
-    data = {
-        'Age': age,
-        'Family_Size': family_size,
-        'Gender': gender,
-        'Monthly_Income': monthly_income
-    }
-    try:
-        response = requests.post('http://localhost:5000', json=data)
-        result = response.json().get('prediction', 'Error: No prediction returned')
-        st.write(f'Prediction: {result}')
-    except Exception as e:
-        st.write(f"Error: {str(e)}")
+    # Form for input
+    with st.form(key='prediction_form'):
+        age = st.number_input('Age', min_value=0)
+        gender = st.selectbox('Gender', ['Male', 'Female'])
+        monthly_income = st.selectbox('Monthly Income', ['No Income', 'Below Rs.10000', '10001 to 25000', '25001 to 50000', 'More than 50000'])
+        family_size = st.number_input('Family Size', min_value=1, max_value=10)
+
+        submit_button = st.form_submit_button(label='Predict')
+
+        if submit_button:
+            # Convert inputs into a DataFrame with correct column names
+            gender_map = {'Male': 0, 'Female': 1}
+            income_map = {
+                'No Income': 0,
+                'Below Rs.10000': 1,
+                '10001 to 25000': 2,
+                '25001 to 50000': 3,
+                'More than 50000': 4
+            }
+
+            data = pd.DataFrame({
+                'Age': [age],
+                'Gender': [gender_map[gender]],
+                'Monthly_Income': [income_map[monthly_income]],
+                'Family_Size': [family_size]
+            })
+
+            # Predict
+            prediction = model.predict(data)[0]
+            st.write(f'Prediction: {"Yes" if prediction == 1 else "No"}')
+
+if _name_ == "_main_":
+    main()
