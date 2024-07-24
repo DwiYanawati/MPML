@@ -9,7 +9,7 @@ monthly_income = st.selectbox("Monthly Income", ["No Income", "Low", "Medium", "
 # Tombol untuk prediksi
 if st.button("Predict"):
     # Kirim permintaan ke server backend
-    url = "http://localhost:5000/predict"
+    url = "http://localhost:5000"
     data = {"family_size": family_size, "gender": gender, "monthly_income": monthly_income}
     response = requests.post(url, json=data)
     
