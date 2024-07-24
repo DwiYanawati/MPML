@@ -44,5 +44,5 @@ def main():
             prediction = model.predict(data)[0]
             st.write(f'Prediction: {"Yes" if prediction == 1 else "No"}')
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
