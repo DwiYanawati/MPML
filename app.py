@@ -1,10 +1,7 @@
 import streamlit as st
 import joblib
 import pandas as pd
-
-# Ganti dengan jalur absolut ke file model Anda
 import os
-import joblib
 
 # Tentukan jalur absolut untuk file model
 model_path = os.path.join('/mount/src/mpml', 'best_model.pkl')
@@ -12,23 +9,21 @@ print(f"Attempting to load model from: {model_path}")
 
 if not os.path.isfile(model_path):
     raise FileNotFoundError(f"Model file {model_path} does not exist.")
+else:
+    print(f"File {model_path} found.")
 
 model = joblib.load(model_path)
 
-import os
-import joblib
+# Daftar fitur yang diharapkan oleh model
+expected_features = [
+    'Gender', 'Marital Status', 'Occupation', 'Monthly Income', 
+    'Educational Qualifications', 'Age', 'Family size', 'latitude', 
+    'longitude', 'Pin code'
+]
 
-model_path = os.path.join('/mount/src/mpml', 'best_model.pkl')
-print(f"Attempting to load model from: {model_path}")
-
-if os.path.isfile(model_path):
-    print(f"File {model_path} found.")
-else:
-    print(f"File {model_path} does not exist.")
- 
 # Streamlit application
 def main():
-    st.title('Welcome to the Customer App')
+    st.title('Welcome to the Customer Feedback Prediction App')
 
     # Form for input
     with st.form(key='prediction_form'):
@@ -37,7 +32,6 @@ def main():
         occupation = st.selectbox('Occupation', ['Employee', 'Student', 'Self Employed', 'House Wife', 'Other'])
         monthly_income = st.selectbox('Monthly Income', ['No Income', 'Below Rs.10000', '10001 to 25000', '25001 to 50000', 'More than 50000'])
         educational_qualifications = st.selectbox('Educational Qualifications', ['Graduate', 'Post Graduate', 'Ph.D', 'School', 'Uneducated'])
-        feedback = st.selectbox('Feedback', ['Positive', 'Negative'])
         age = st.number_input('Age', min_value=0)
         family_size = st.number_input('Family Size', min_value=1, max_value=10)
         latitude = st.number_input('Latitude')
@@ -54,7 +48,6 @@ def main():
                 'Occupation': [occupation],
                 'Monthly Income': [monthly_income],
                 'Educational Qualifications': [educational_qualifications],
-                'Feedback': [feedback],
                 'Age': [age],
                 'Family size': [family_size],
                 'latitude': [latitude],
@@ -62,9 +55,13 @@ def main():
                 'Pin code': [pin_code]
             })
 
-            # Predict
-            prediction = model.predict(data)[0]
-            st.write(f'Prediction: {prediction}')
+            # Validasi fitur
+            if list(data.columns) != expected_features:
+                st.error("Fitur yang diberikan tidak sesuai dengan yang diharapkan oleh model.")
+            else:
+                # Predict
+                prediction = model.predict(data)[0]
+                st.write(f'Prediction: {prediction}')
 
 if __name__ == "__main__":
     main()
