@@ -1,116 +1,70 @@
-from flask import Flask, render_template, request
-import sqlite3 as sql
+import streamlit as st
 import joblib
-import numpy as np
+import pandas as pd
+
+# Ganti dengan jalur absolut ke file model Anda
 import os
+import joblib
 
-# Menghubungkan ke database dan membuat tabel jika belum ada
-conn = sql.connect('customer.db')
-print("Membuat database baru")
+# Tentukan jalur absolut untuk file model
+model_path = os.path.join('\customer_app', 'best_model.pkl')
+print(f"Attempting to load model from: {model_path}")
 
-conn.execute('''
-CREATE TABLE IF NOT EXISTS customer (
-    id INTEGER NOT NULL PRIMARY KEY,
-    Age INTEGER,
-    Gender TEXT,
-    Monthly_Income TEXT,
-    Family_Size INTEGER
-)
-''')
-print("Tabel berhasil dibuat")
-conn.close()
+if not os.path.isfile(model_path):
+    raise FileNotFoundError(f"Model file {model_path} does not exist.")
 
-# Inisialisasi aplikasi Flask
-app = Flask(__name__)
+model = joblib.load(model_path)
 
-# Memeriksa apakah file model ada dan memuatnya
-model_file = 'best_model.pkl'
-if os.path.exists(model_file):
-    model = joblib.load(model_file)
-    print(f"Model {model_file} berhasil dimuat.")
+import os
+import joblib
+
+model_path = os.path.join('\customer_app', 'best_model.pkl')
+print(f"Attempting to load model from: {model_path}")
+
+if os.path.isfile(model_path):
+    print(f"File {model_path} found.")
 else:
-    print(f"File {model_file} tidak ditemukan. Pastikan file tersebut ada di direktori yang benar.")
+    print(f"File {model_path} does not exist.")
+ 
+# Streamlit application
+def main():
+    st.title('Welcome to the Customer App')
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+    # Form for input
+    with st.form(key='prediction_form'):
+        gender = st.selectbox('Gender', ['Male', 'Female'])
+        marital_status = st.selectbox('Marital Status', ['Single', 'Married', 'Prefer Not to Say'])
+        occupation = st.selectbox('Occupation', ['Employee', 'Student', 'Self Employed', 'House Wife', 'Other'])
+        monthly_income = st.selectbox('Monthly Income', ['No Income', 'Below Rs.10000', '10001 to 25000', '25001 to 50000', 'More than 50000'])
+        educational_qualifications = st.selectbox('Educational Qualifications', ['Graduate', 'Post Graduate', 'Ph.D', 'School', 'Uneducated'])
+        feedback = st.selectbox('Feedback', ['Positive', 'Negative'])
+        age = st.number_input('Age', min_value=0)
+        family_size = st.number_input('Family Size', min_value=1, max_value=10)
+        latitude = st.number_input('Latitude')
+        longitude = st.number_input('Longitude')
+        pin_code = st.number_input('Pin Code')
 
-@app.route('/enternew')
-def new_customer():
-    return render_template('datacustomer.html')
+        submit_button = st.form_submit_button(label='Predict')
 
-@app.route('/addrec', methods=['POST', 'GET'])
-def addrec():
-    if request.method == 'POST':
-        try:
-            # Mengambil data dari formulir
-            id = request.form['id']
-            age = request.form['Age']
-            gender = request.form['Gender']
-            monthly_income = request.form['Monthly_Income']
-            family_size = request.form['Family_Size']
+        if submit_button:
+            # Create DataFrame for prediction
+            data = pd.DataFrame({
+                'Gender': [gender],
+                'Marital Status': [marital_status],
+                'Occupation': [occupation],
+                'Monthly Income': [monthly_income],
+                'Educational Qualifications': [educational_qualifications],
+                'Feedback': [feedback],
+                'Age': [age],
+                'Family size': [family_size],
+                'latitude': [latitude],
+                'longitude': [longitude],
+                'Pin code': [pin_code]
+            })
 
-            # Memasukkan data ke database
-            with sql.connect("customer.db") as con:
-                cur = con.cursor()
-                cur.execute('''
-                    INSERT INTO customer (id, Age, Gender, Monthly_Income, Family_Size) 
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (id, age, gender, monthly_income, family_size))
-                con.commit()
-                msg = "Rekaman berhasil ditambahkan"
-        except Exception as e:
-            con.rollback()
-            msg = f"Terjadi kesalahan saat menambah rekaman: {str(e)}"
-        finally:
-            return render_template("result.html", msg=msg)
-            con.close()
+            # Predict
+            prediction = model.predict(data)[0]
+            st.write(f'Prediction: {prediction}')
 
-@app.route('/list')
-def list():
-    con = sql.connect("customer.db")
-    con.row_factory = sql.Row
-
-    cur = con.cursor()
-    cur.execute("SELECT * FROM customer")
-
-    rows = cur.fetchall()
-    return render_template("list.html", rows=rows)
-
-@app.route('/predict', methods=['GET', 'POST'])
-def predict():
-    if request.method == 'POST':
-        try:
-            # Mengambil data dari formulir untuk prediksi
-            age = float(request.form['Age'])
-            family_size = float(request.form['Family_Size'])
-            gender = request.form['Gender']
-            monthly_income = request.form['Monthly_Income']
-
-            # Konversi input menjadi format yang sesuai dengan model
-            gender_map = {'Male': 0, 'Female': 1}
-            income_map = {
-                'No Income': 0,
-                'Below Rs.10000': 1,
-                '10001 to 25000': 2,
-                '25001 to 50000': 3,
-                'More than 50000': 4
-            }
-
-            gender = gender_map[gender]
-            monthly_income = income_map[monthly_income]
-
-            # Memasukkan fitur ke dalam array
-            features = np.array([[age, gender, monthly_income, family_size]])
-            prediction = model.predict(features)
-            result = "Ya" if prediction[0] == 1 else "Tidak"
-        except Exception as e:
-            result = f"Terjadi kesalahan dalam prediksi: {str(e)}"
-
-        return render_template("result.html", msg=f"Prediksi Kelas: {result}")
-    else:
-        return render_template('predict.html')
-
-if __name__ == '__main__':
-    print(f"Direktori kerja saat ini: {os.getcwd()}")
-    app.run(debug=True)
+if __name__ == "__main__":
+    main()
