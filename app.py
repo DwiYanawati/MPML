@@ -21,7 +21,7 @@ if st.button('Predict'):
         'Monthly_Income': monthly_income
     }
     try:
-        response = requests.post('http://localhost:5000/predict', json=data)
+        response = request.post('http://localhost:5000/predict', json=data)
         result = response.json().get('prediction', 'Error: No prediction returned')
         st.write(f'Prediction: {result}')
     except Exception as e:
